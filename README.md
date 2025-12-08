@@ -1,1 +1,27 @@
-# rental_predictions
+# Predicting Rental Prices
+
+Hello AirDNA Team!  This README will guide you through the files I created and how I chose to navigate the assignment.  This was a fun exercise in showcasing my abilities which I hope you find value in.  A few comments on my approach:
+
+1. My goal was to create an end-to-end training pipeline in miniature to be used in a Databricks environment.  This includes integration with MlFlow, the Databricks' model registry, and a workflow pipeline to orchestrate data preparation, training, and test set inference (please see the description of the yaml file below).
+2. For data preparation I focused mostly on the data that was provided and performed EDA to better understand trends I saw within.  I did however augment the provided data with two publicly available data sets from data.gov; one for New York City parks, and another for museums.  
+3. Although one could take this in any number of directions, I decided to experiment with one model type which was a LightGBM regressor.  The two main reasons driving this choice were a.) a general preference towards tree-based algorithms and the direct interpretability of feature importance via the split and gain importance scores, and b.) LightGBM's handling of categorical variables via optimal partitioning which has a strong advantage over one-hot or other encodings.  Ideally on a production-scale problem I would spend time to build out implementations with a number of different models, but I chose to limit my scope given time constraints. 
+
+## Contents
+The contents of this folder are the following files:
+
+ - **`data_preparation`** - this is the main notebook used for preparing data sets for both training and inference.  The notebook is parameterized so that it can generate both sets of data when called as separate tasks in the workflow.  
+ - **`EDA`** - This is where I did initial exploration of the data with views such as box-whisker plots to understand the distribution of values, and particularly mappings of Manhattan using latitude and longitude as scatter points with color given by varying fields.  Some high-level takeaways from this exploration were that a.) 98% of the training data was focused on Manhattan listings, b.) prices in general were higher in lower Manhattan than they were north on the island and this appeared to have a clear gradient, c.) prices were on average higher for listings with 2.5 baths, d.) prices were on average higher when the listing was for the entire unit.  In addition, I noticed that some records had bizarre floating point values for bathrooms and bedrooms (each around 1.08 or so).  Unless there is some industry-specific language around 8% extra, I took these as erroneous and rounded them in the `data_preparation` notebook (of course in a production setting, imperative to get to the ground truth for how a floating point is generated and determining if it is substantive, but I made this assumption given my limited understanding of how the data was generated).
+ - **`features.py`** - this is a simple file to keep feature sets in a central location for avoiding duplication.
+ - **`helper_functions.py`** - this is a file with a couple of auxiliary functions but could be expanded to include any number of helper functions.  The two functions this is populated with aid in processing latitude and longitude data from the external museum and parks data sets.
+ - **`model_training_workflow.yml`** - this is the .yml file that arranges the orchestrator so that you can recreate the workflow in your own Databricks workspace.  Be mindful that you will need to adjust the artifact paths.
+ - **`Questions`** - this is the original notebook supplied with the prompt for the assignment.
+ - **`README.md`** - this file.  The one you're currently reading.
+ - **`results`** - This is a folder that contains selected images from EDA, the feature importances for the augmented data, and screenshots of metric calculations.
+ - **`submissions.csv`** - this is the file that contains inference results from the model as requested in the initial prompt.
+ - **`testing`** - this is the notebook that orchestrates the inference on the testing data set (produced from the `data_preparation` notebook).  The approach I took here was to source the model from the registry and to emulate the approach I would take for a large scale data set.  I therefore perform the inference via a pandas udf and keep the dataframe in spark.  I do however use a call of `.toPandas()` downstream in this notebook when collecting metrics.  The MlFlow run ID that is called here is sourced from the training notebook which passes on the run ID as a job widget.
+ - **`training`** - the notebook that performs the training with the LightGBM regressor, registers the model, and logs the results to the MlFlow experiment.  MlFlow experiments are tagged with a string which includes the run ID of the workflow, and this run ID also tags the registered model version as an alias so that matching can be performed for backtesting and other analyses.  
+
+I hope that this file explains the contents better and that we can have a meaningful discussion where I can walk the team through the code and my thought process.  Until then feel free to reach out to me if you have any questions.
+
+Paul
+paulalexanderdavid@gmail.com
