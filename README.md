@@ -21,7 +21,17 @@ The contents of this folder are the following files:
  - **`testing`** - this is the notebook that orchestrates the inference on the testing data set (produced from the `data_preparation` notebook).  The approach I took here was to source the model from the registry and to emulate the approach I would take for a large scale data set.  I therefore perform the inference via a pandas udf and keep the dataframe in spark.  I do however use a call of `.toPandas()` downstream in this notebook when collecting metrics.  The MlFlow run ID that is called here is sourced from the training notebook which passes on the run ID as a job widget.
  - **`training`** - the notebook that performs the training with the LightGBM regressor, registers the model, and logs the results to the MlFlow experiment.  MlFlow experiments are tagged with a string which includes the run ID of the workflow, and this run ID also tags the registered model version as an alias so that matching can be performed for backtesting and other analyses.  
 
+
+## Data Ingestion and Sourcing
+A quick note on the data sources.  Because I wanted to provide a Databricks-centric solution to this problem, I loaded the .csv files provided as tables in the Databricks catalog.  Although training and testing prepared data sets are created as part of the training pipeline, there are 4 base tables I used for this.  Please note that you will need to load these datasets into your local environment and rename the data sourcing accordingly throughout each of the files:
+ - `workspace.rental_pricing.train` - this is the original training data provided as `train.csv` in the assignment.
+ - `workspace.rental_pricing.test` - this is the original testing data provided as `test.csv` in the assignment.
+ - `workspace.rental_pricing.nyc_museums` - this is an external data set I augmented the assignment with to see if I could get better results with nearby museum information.  This was downloaded from [data.gov](https://catalog.data.gov/dataset/museum-b306c?utm_source=chatgpt.com) and the original data was last updated (according to their site) on 2024-02-24.
+ - `workspace.rental_pricing.nyc_parks` - this is an external data set I augmented the assignment with to see if I could get better results with nearby park information.  This was downloaded from [data.gov](https://catalog.data.gov/dataset/opendata-parksproperties?utm_source=chatgpt.com) and the original data was last updated (according to their site) on 2024-04-26.
+
+-------------------
 I hope that this file explains the contents better and that we can have a meaningful discussion where I can walk the team through the code and my thought process.  Until then feel free to reach out to me if you have any questions.
 
 Paul
+
 paulalexanderdavid@gmail.com
