@@ -43,4 +43,6 @@ resources:
       parameters:
         - name: preparation
           default: unmodified
+        - name: museum_and_parks
+          default: "True"
       performance_target: PERFORMANCE_OPTIMIZED
