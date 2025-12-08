@@ -1,0 +1,46 @@
+resources:
+  jobs:
+    rental_prediction_model_training:
+      name: rental_prediction_model_training
+      tasks:
+        - task_key: testing_set_creation
+          notebook_task:
+            notebook_path: /Workspace/Users/paulalexanderdavid@gmail.com/rental_predictions/data_preparation
+            base_parameters:
+              data_set: test
+              job_id: "{{job.id}}"
+              run_id: "{{job.run_id}}"
+            source: WORKSPACE
+        - task_key: training_set_creation
+          notebook_task:
+            notebook_path: /Workspace/Users/paulalexanderdavid@gmail.com/rental_predictions/data_preparation
+            base_parameters:
+              data_set: train
+              job_id: "{{job.id}}"
+              run_id: "{{job.run_id}}"
+            source: WORKSPACE
+        - task_key: train_model
+          depends_on:
+            - task_key: training_set_creation
+          notebook_task:
+            notebook_path: /Workspace/Users/paulalexanderdavid@gmail.com/rental_predictions/training
+            base_parameters:
+              job_id: "{{job.id}}"
+              run_id: "{{job.run_id}}"
+            source: WORKSPACE
+        - task_key: inference_test_set
+          depends_on:
+            - task_key: train_model
+            - task_key: testing_set_creation
+          notebook_task:
+            notebook_path: /Workspace/Users/paulalexanderdavid@gmail.com/rental_predictions/testing
+            base_parameters:
+              job_id: "{{job.id}}"
+              run_id: "{{job.run_id}}"
+            source: WORKSPACE
+      queue:
+        enabled: true
+      parameters:
+        - name: preparation
+          default: unmodified
+      performance_target: PERFORMANCE_OPTIMIZED
